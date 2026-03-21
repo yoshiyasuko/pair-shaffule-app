@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <base target="_top">
+  <?!= include('Stylesheet'); ?>
+</head>
+<body>
+
+  <!-- ===== スタート画面 ===== -->
+  <div id="start-screen" class="screen active">
+    <div class="start-container">
+      <h1 class="main-title">ペアリング抽選会</h1>
+      <p class="subtitle">運命の組み合わせが今、決まる——</p>
+      <div id="member-count" class="member-count"></div>
+      <button id="start-btn" class="btn-start" disabled>
+        <span class="btn-text">抽選スタート！</span>
+      </button>
+      <div id="error-message" class="error-message"></div>
+    </div>
+  </div>
+
+  <!-- ===== カード画面 ===== -->
+  <div id="card-screen" class="screen">
+    <div class="controls">
+      <button id="reveal-btn" class="btn-control btn-reveal">ペア発表！</button>
+      <button id="sound-toggle-btn" class="btn-control">🔊 ON</button>
+      <button id="retry-btn" class="btn-control">もう一度</button>
+      <button id="reload-btn" class="btn-control">🔄 社員リスト再読み込み</button>
+      <a id="sheet-link" class="btn-control sheet-link" href="#" target="_blank">📋 社員リストを開く</a>
+    </div>
+    <h2 class="screen-title">準備OK！カードをめくってペアを確認しよう</h2>
+    <div id="card-grid" class="card-grid"></div>
+    <div id="complete-message" class="complete-message"></div>
+  </div>
+
+  <!-- トースト通知 -->
+  <div id="toast" class="toast"></div>
+
+  <!-- 紙吹雪用Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <?!= include('JavaScript'); ?>
+</body>
+</html>

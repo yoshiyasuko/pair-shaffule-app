@@ -1,0 +1,491 @@
+<script>
+(function () {
+  'use strict';
+
+  // ===== State =====
+  let employees = [];
+  let pairs = [];
+  let flippedCount = 0;
+  let totalCards = 0;
+  let soundEnabled = true;
+  let audioCtx = null;
+
+  // ===== DOM =====
+  const startScreen = document.getElementById('start-screen');
+  const cardScreen = document.getElementById('card-screen');
+  const memberCount = document.getElementById('member-count');
+  const errorMessage = document.getElementById('error-message');
+  const startBtn = document.getElementById('start-btn');
+  const cardGrid = document.getElementById('card-grid');
+  const revealBtn = document.getElementById('reveal-btn');
+  const soundToggleBtn = document.getElementById('sound-toggle-btn');
+  const retryBtn = document.getElementById('retry-btn');
+  const reloadBtn = document.getElementById('reload-btn');
+  const sheetLink = document.getElementById('sheet-link');
+  const toast = document.getElementById('toast');
+  const completeMessage = document.getElementById('complete-message');
+  const confettiCanvas = document.getElementById('confetti-canvas');
+  const ctx = confettiCanvas.getContext('2d');
+
+  // ===== 初期化 =====
+  function init() {
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    startBtn.addEventListener('click', onStartClick);
+    revealBtn.addEventListener('click', revealAll);
+    soundToggleBtn.addEventListener('click', toggleSound);
+    retryBtn.addEventListener('click', retry);
+    reloadBtn.addEventListener('click', reloadEmployees);
+    loadEmployees();
+    loadSheetLink();
+  }
+
+  function resizeCanvas() {
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+  }
+
+  // ===== データ取得 =====
+  function loadEmployees() {
+    memberCount.textContent = '読み込み中...';
+    google.script.run
+      .withSuccessHandler(function (list) {
+        employees = list;
+        if (employees.length < 2) {
+          memberCount.textContent = '';
+          errorMessage.textContent = '参加者が足りません（2名以上必要です）';
+          return;
+        }
+        memberCount.textContent = '参加者: ' + employees.length + '名';
+        startBtn.disabled = false;
+      })
+      .withFailureHandler(function (err) {
+        memberCount.textContent = '';
+        errorMessage.textContent = err.message || 'データの取得に失敗しました';
+      })
+      .getEmployeeList();
+  }
+
+  // ===== スプレッドシートリンク取得 =====
+  function loadSheetLink() {
+    google.script.run
+      .withSuccessHandler(function (url) {
+        sheetLink.href = url;
+      })
+      .getSpreadsheetUrl();
+  }
+
+  // ===== トースト通知 =====
+  var toastTimer = null;
+  function showToast(message, isError) {
+    clearTimeout(toastTimer);
+    toast.textContent = message;
+    toast.className = 'toast' + (isError ? ' toast-error' : '');
+    // reflow
+    void toast.offsetWidth;
+    toast.classList.add('show');
+    toastTimer = setTimeout(function () {
+      toast.classList.remove('show');
+    }, 3000);
+  }
+
+  // ===== スプレッドシート再読み込み =====
+  function reloadEmployees() {
+    reloadBtn.disabled = true;
+    reloadBtn.textContent = '🔄 読み込み中...';
+    google.script.run
+      .withSuccessHandler(function (list) {
+        employees = list;
+        reloadBtn.disabled = false;
+        reloadBtn.textContent = '🔄 社員リスト再読み込み';
+        if (employees.length < 2) {
+          showToast('参加者が足りません（2名以上必要です）', true);
+          return;
+        }
+        showToast('社員リストを再読み込みしました（' + employees.length + '名）', false);
+        // 再シャッフルしてめくる準備状態にリセット
+        pairs = generatePairs(employees);
+        totalCards = pairs.length;
+        flippedCount = 0;
+        isRevealing = false;
+        revealBtn.disabled = false;
+        completeMessage.classList.remove('visible');
+        completeMessage.textContent = '';
+        renderCards();
+      })
+      .withFailureHandler(function (err) {
+        reloadBtn.disabled = false;
+        reloadBtn.textContent = '🔄 社員リスト再読み込み';
+        showToast('再読み込みに失敗しました: ' + (err.message || ''), true);
+      })
+      .getEmployeeList();
+  }
+
+  // ===== シャッフル (Fisher-Yates) =====
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      var tmp = a[i];
+      a[i] = a[j];
+      a[j] = tmp;
+    }
+    return a;
+  }
+
+  // ===== ペア生成 =====
+  function generatePairs(list) {
+    var shuffled = shuffle(list);
+    var pairCards = [];
+    var soloCard = null;
+    for (var i = 0; i < shuffled.length; i += 2) {
+      if (i + 1 < shuffled.length) {
+        pairCards.push({ names: [shuffled[i], shuffled[i + 1]], solo: false });
+      } else {
+        soloCard = { names: [shuffled[i]], solo: true };
+      }
+    }
+    // ペアカードをシャッフルし、お一人様は最後に配置
+    var result = shuffle(pairCards);
+    if (soloCard) result.push(soloCard);
+    return result;
+  }
+
+  // ===== スタート =====
+  function onStartClick() {
+    pairs = generatePairs(employees);
+    totalCards = pairs.length;
+    flippedCount = 0;
+    showCardScreen();
+  }
+
+  function showCardScreen() {
+    startScreen.classList.remove('active');
+    cardScreen.classList.add('active');
+    completeMessage.classList.remove('visible');
+    completeMessage.textContent = '';
+    renderCards();
+  }
+
+  // ===== カード描画 =====
+  function renderCards() {
+    cardGrid.innerHTML = '';
+    pairs.forEach(function (pair, idx) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'card-wrapper';
+      wrapper.style.animationDelay = (idx * 0.1) + 's';
+
+      var card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.index = idx;
+
+      // 裏面（未開封側）
+      var front = document.createElement('div');
+      front.className = 'card-face card-front' + (pair.solo ? ' solo-front' : '');
+      var num = document.createElement('span');
+      num.className = 'card-number';
+      num.textContent = '#' + (idx + 1);
+      front.appendChild(num);
+      if (pair.solo) {
+        var badge = document.createElement('span');
+        badge.className = 'solo-badge';
+        badge.textContent = 'SPECIAL';
+        front.appendChild(badge);
+      }
+
+      // 表面（ペア情報）
+      var back = document.createElement('div');
+      back.className = 'card-face card-back' + (pair.solo ? ' solo' : '');
+
+      if (pair.solo) {
+        var icon = document.createElement('div');
+        icon.className = 'solo-icon';
+        icon.innerHTML = '&#128546;';
+        var label = document.createElement('div');
+        label.className = 'pair-label';
+        label.textContent = '残念！お一人様です...';
+        var names = document.createElement('div');
+        names.className = 'pair-names';
+        names.textContent = pair.names[0];
+        back.appendChild(icon);
+        back.appendChild(label);
+        back.appendChild(names);
+      } else {
+        var label = document.createElement('div');
+        label.className = 'pair-label';
+        label.textContent = 'PAIR';
+        var names = document.createElement('div');
+        names.className = 'pair-names';
+        names.innerHTML = escapeHtml(pair.names[0])
+          + '<span class="amp">&amp;</span>'
+          + escapeHtml(pair.names[1]);
+        back.appendChild(label);
+        back.appendChild(names);
+      }
+
+      card.appendChild(front);
+      card.appendChild(back);
+      wrapper.appendChild(card);
+
+      cardGrid.appendChild(wrapper);
+    });
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  // ===== めくる（全カードを順番にめくる） =====
+  var isRevealing = false;
+  var FLIP_INTERVAL = 800;
+
+  function revealAll() {
+    if (isRevealing) return;
+    isRevealing = true;
+    revealBtn.disabled = true;
+
+    var cards = Array.from(cardGrid.querySelectorAll('.card:not(.flipped)'));
+    var delay = 0;
+
+    cards.forEach(function (card, i) {
+      var idx = parseInt(card.dataset.index);
+      var pair = pairs[idx];
+      var wrapper = card.parentElement;
+
+      if (pair.solo) {
+        // お一人様カードは直前に追加の間を置いて特別演出
+        delay += 500;
+        setTimeout(function () {
+          revealSoloCard(card, wrapper);
+        }, delay);
+      } else {
+        setTimeout(function () {
+          flipCard(card, false);
+          // お一人様なし & 最後のカード → 完了
+          if (i === cards.length - 1) {
+            setTimeout(onAllRevealed, 600);
+          }
+        }, delay);
+        delay += FLIP_INTERVAL;
+      }
+    });
+  }
+
+  function flipCard(card, isSolo) {
+    card.classList.add('flipped');
+    flippedCount++;
+
+    if (soundEnabled) {
+      if (isSolo) {
+        playSoloSound();
+      } else {
+        playFlipSound();
+      }
+    }
+
+    // 紙吹雪
+    var rect = card.getBoundingClientRect();
+    var cx = rect.left + rect.width / 2;
+    var cy = rect.top + rect.height / 2;
+    spawnConfetti(cx, cy, isSolo ? 15 : 30, isSolo);
+
+    // カードが見える位置にスクロール
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // ===== お一人様カード特別演出 =====
+  function revealSoloCard(card, wrapper) {
+    // スクロールしてフォーカス
+    wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // ドラムロール
+    if (soundEnabled) playDrumroll();
+
+    // スポットライトアニメーション
+    wrapper.classList.add('solo-spotlight');
+
+    // 1.5秒後にフリップ
+    setTimeout(function () {
+      flipCard(card, true);
+
+      // フリップ後少し待って完了演出
+      setTimeout(function () {
+        isRevealing = false;
+        onAllRevealed();
+      }, 800);
+    }, 1500);
+  }
+
+  function onAllRevealed() {
+    revealBtn.disabled = true;
+    completeMessage.textContent = '🎉 全ペア発表完了！ 🎉';
+    completeMessage.classList.add('visible');
+    if (soundEnabled) playFanfareSound();
+    spawnConfetti(window.innerWidth / 2, window.innerHeight / 2, 200, false);
+  }
+
+  // ===== もう一度 =====
+  function retry() {
+    pairs = generatePairs(employees);
+    totalCards = pairs.length;
+    flippedCount = 0;
+    isRevealing = false;
+    revealBtn.disabled = false;
+    completeMessage.classList.remove('visible');
+    completeMessage.textContent = '';
+    renderCards();
+  }
+
+  // ===== サウンド ON/OFF =====
+  function toggleSound() {
+    soundEnabled = !soundEnabled;
+    soundToggleBtn.textContent = soundEnabled ? '🔊 ON' : '🔇 OFF';
+  }
+
+  // ===== Web Audio API 効果音 =====
+  function getAudioCtx() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioCtx;
+  }
+
+  function playFlipSound() {
+    try {
+      var ac = getAudioCtx();
+      var osc = ac.createOscillator();
+      var gain = ac.createGain();
+      osc.connect(gain);
+      gain.connect(ac.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, ac.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1200, ac.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.15, ac.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.3);
+      osc.start(ac.currentTime);
+      osc.stop(ac.currentTime + 0.3);
+    } catch (e) {}
+  }
+
+  function playSoloSound() {
+    try {
+      var ac = getAudioCtx();
+      var osc = ac.createOscillator();
+      var gain = ac.createGain();
+      osc.connect(gain);
+      gain.connect(ac.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(400, ac.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(200, ac.currentTime + 0.4);
+      gain.gain.setValueAtTime(0.12, ac.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.5);
+      osc.start(ac.currentTime);
+      osc.stop(ac.currentTime + 0.5);
+    } catch (e) {}
+  }
+
+  function playFanfareSound() {
+    try {
+      var ac = getAudioCtx();
+      var notes = [523, 659, 784, 1047];
+      notes.forEach(function (freq, i) {
+        var osc = ac.createOscillator();
+        var gain = ac.createGain();
+        osc.connect(gain);
+        gain.connect(ac.destination);
+        osc.type = 'sine';
+        var t = ac.currentTime + i * 0.15;
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0.15, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+        osc.start(t);
+        osc.stop(t + 0.4);
+      });
+    } catch (e) {}
+  }
+
+  function playDrumroll() {
+    try {
+      var ac = getAudioCtx();
+      var duration = 1.4;
+      var steps = 28;
+      for (var i = 0; i < steps; i++) {
+        var osc = ac.createOscillator();
+        var gain = ac.createGain();
+        osc.connect(gain);
+        gain.connect(ac.destination);
+        osc.type = 'triangle';
+        var t = ac.currentTime + i * (duration / steps);
+        osc.frequency.setValueAtTime(150 + i * 3, t);
+        gain.gain.setValueAtTime(0.06 + (i / steps) * 0.1, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+        osc.start(t);
+        osc.stop(t + 0.06);
+      }
+    } catch (e) {}
+  }
+
+  // ===== 紙吹雪 (Canvas パーティクル) =====
+  var particles = [];
+  var animating = false;
+
+  function spawnConfetti(x, y, count, isSolo) {
+    var colors = isSolo
+      ? ['#ff82b4', '#ff5e99', '#ffb6d3', '#d94f8a']
+      : ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#f7dc6f', '#bb8fce', '#ff8a5c'];
+    for (var i = 0; i < count; i++) {
+      particles.push({
+        x: x,
+        y: y,
+        vx: (Math.random() - 0.5) * 12,
+        vy: (Math.random() - 1) * 10 - 2,
+        w: Math.random() * 8 + 4,
+        h: Math.random() * 6 + 2,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360,
+        rotSpeed: (Math.random() - 0.5) * 15,
+        gravity: 0.2 + Math.random() * 0.1,
+        life: 1
+      });
+    }
+    if (!animating) {
+      animating = true;
+      animateConfetti();
+    }
+  }
+
+  function animateConfetti() {
+    ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    for (var i = particles.length - 1; i >= 0; i--) {
+      var p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += p.gravity;
+      p.vx *= 0.99;
+      p.rotation += p.rotSpeed;
+      p.life -= 0.008;
+      if (p.life <= 0 || p.y > confettiCanvas.height + 20) {
+        particles.splice(i, 1);
+        continue;
+      }
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate((p.rotation * Math.PI) / 180);
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    }
+    if (particles.length > 0) {
+      requestAnimationFrame(animateConfetti);
+    } else {
+      animating = false;
+    }
+  }
+
+  // ===== 起動 =====
+  init();
+})();
+</script>
