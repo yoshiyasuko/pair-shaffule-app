@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git config:*)",
+      "Bash(npm list:*)",
+      "Bash(npm install:*)",
+      "Bash(clasp login:*)",
+      "Bash(clasp clone:*)",
+      "Bash(clasp push:*)",
+      "Bash(clasp deployments:*)",
+      "Bash(clasp deploy:*)",
+      "WebFetch(domain:nyosegawa.com)",
+      "Bash(chmod:*)",
+      "Bash(npx skills:*)",
+      "Skill(update-config)",
+      "Bash(jq:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command // \"\"' | grep -q 'git commit' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"【自動リマインド】git commit の前に、今回の変更内容に基づいて CLAUDE.md と README.md の更新が必要か確認してください。必要であれば先に更新してからコミットしてください。\"}}' || true",
+            "timeout": 5,
+            "statusMessage": "ドキュメント更新チェック..."
+          }
+        ]
+      }
+    ]
+  }
+}
