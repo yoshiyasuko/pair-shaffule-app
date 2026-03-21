@@ -1,8 +1,9 @@
-# clasp
+# clasp (contains script ID — user-specific)
 .clasp.json
 
-# Node.js (clasp install)
+# Node.js
 node_modules/
+package-lock.json
 
 # OS
 .DS_Store
@@ -12,3 +13,8 @@ Thumbs.db
 *.swp
 *.swo
 *~
+.idea/
+.vscode/
+
+# Claude Code (local settings — user-specific)
+.claude/settings.local.json
