@@ -1,6 +1,6 @@
 // =============================================
-// スクリプトプロパティ「SPREADSHEET_ID」から取得
-// 設定方法: GASエディタ → プロジェクトの設定 → スクリプトプロパティ
+// Retrieve SPREADSHEET_ID from script properties
+// Setup: GAS Editor → Project Settings → Script Properties
 // =============================================
 function getSpreadsheetId_() {
   const id = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
@@ -11,7 +11,7 @@ function getSpreadsheetId_() {
 }
 
 /**
- * Web App のエントリポイント
+ * Web App entry point
  */
 function doGet() {
   return HtmlService.createTemplateFromFile('Index')
@@ -21,21 +21,21 @@ function doGet() {
 }
 
 /**
- * HTML テンプレート内で CSS/JS をインクルードするヘルパー
+ * Helper to include CSS/JS within HTML templates
  */
 function include(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
 
 /**
- * スプレッドシートのURLを返す
+ * Return the spreadsheet URL
  */
 function getSpreadsheetUrl() {
   return 'https://docs.google.com/spreadsheets/d/' + getSpreadsheetId_();
 }
 
 /**
- * スプレッドシートから社員リストを取得
+ * Fetch employee list from the spreadsheet
  */
 function getEmployeeList() {
   try {

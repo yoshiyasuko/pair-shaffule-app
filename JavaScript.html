@@ -27,7 +27,7 @@
   const confettiCanvas = document.getElementById('confetti-canvas');
   const ctx = confettiCanvas.getContext('2d');
 
-  // ===== 初期化 =====
+  // ===== Initialization =====
   function init() {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
@@ -45,7 +45,7 @@
     confettiCanvas.height = window.innerHeight;
   }
 
-  // ===== データ取得 =====
+  // ===== Data Fetching =====
   function loadEmployees() {
     memberCount.textContent = '読み込み中...';
     google.script.run
@@ -66,7 +66,7 @@
       .getEmployeeList();
   }
 
-  // ===== スプレッドシートリンク取得 =====
+  // ===== Spreadsheet Link =====
   function loadSheetLink() {
     google.script.run
       .withSuccessHandler(function (url) {
@@ -75,7 +75,7 @@
       .getSpreadsheetUrl();
   }
 
-  // ===== トースト通知 =====
+  // ===== Toast Notification =====
   var toastTimer = null;
   function showToast(message, isError) {
     clearTimeout(toastTimer);
@@ -89,7 +89,7 @@
     }, 3000);
   }
 
-  // ===== スプレッドシート再読み込み =====
+  // ===== Reload Spreadsheet =====
   function reloadEmployees() {
     reloadBtn.disabled = true;
     reloadBtn.textContent = '🔄 読み込み中...';
@@ -103,7 +103,7 @@
           return;
         }
         showToast('社員リストを再読み込みしました（' + employees.length + '名）', false);
-        // 再シャッフルしてめくる準備状態にリセット
+        // Re-shuffle and reset to ready-to-flip state
         pairs = generatePairs(employees);
         totalCards = pairs.length;
         flippedCount = 0;
@@ -121,7 +121,7 @@
       .getEmployeeList();
   }
 
-  // ===== シャッフル (Fisher-Yates) =====
+  // ===== Shuffle (Fisher-Yates) =====
   function shuffle(arr) {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -133,7 +133,7 @@
     return a;
   }
 
-  // ===== ペア生成 =====
+  // ===== Pair Generation =====
   function generatePairs(list) {
     var shuffled = shuffle(list);
     var pairCards = [];
@@ -145,13 +145,13 @@
         soloCard = { names: [shuffled[i]], solo: true };
       }
     }
-    // ペアカードをシャッフルし、お一人様は最後に配置
+    // Shuffle pair cards and place the solo card at the end
     var result = shuffle(pairCards);
     if (soloCard) result.push(soloCard);
     return result;
   }
 
-  // ===== スタート =====
+  // ===== Start =====
   function onStartClick() {
     pairs = generatePairs(employees);
     totalCards = pairs.length;
@@ -167,7 +167,7 @@
     renderCards();
   }
 
-  // ===== カード描画 =====
+  // ===== Card Rendering =====
   function renderCards() {
     cardGrid.innerHTML = '';
     pairs.forEach(function (pair, idx) {
@@ -179,7 +179,7 @@
       card.className = 'card';
       card.dataset.index = idx;
 
-      // 裏面（未開封側）
+      // Front face (unrevealed side)
       var front = document.createElement('div');
       front.className = 'card-face card-front' + (pair.solo ? ' solo-front' : '');
       var num = document.createElement('span');
@@ -193,7 +193,7 @@
         front.appendChild(badge);
       }
 
-      // 表面（ペア情報）
+      // Back face (pair info)
       var back = document.createElement('div');
       back.className = 'card-face card-back' + (pair.solo ? ' solo' : '');
 
@@ -237,7 +237,7 @@
     return div.innerHTML;
   }
 
-  // ===== めくる（全カードを順番にめくる） =====
+  // ===== Reveal (flip all cards sequentially) =====
   var isRevealing = false;
   var FLIP_INTERVAL = 800;
 
@@ -255,7 +255,7 @@
       var wrapper = card.parentElement;
 
       if (pair.solo) {
-        // お一人様カードは直前に追加の間を置いて特別演出
+        // Solo card gets extra delay and special reveal effect
         delay += 500;
         setTimeout(function () {
           revealSoloCard(card, wrapper);
@@ -263,7 +263,7 @@
       } else {
         setTimeout(function () {
           flipCard(card, false);
-          // お一人様なし & 最後のカード → 完了
+          // No solo card & last card → complete
           if (i === cards.length - 1) {
             setTimeout(onAllRevealed, 600);
           }
@@ -285,32 +285,32 @@
       }
     }
 
-    // 紙吹雪
+    // Confetti
     var rect = card.getBoundingClientRect();
     var cx = rect.left + rect.width / 2;
     var cy = rect.top + rect.height / 2;
     spawnConfetti(cx, cy, isSolo ? 15 : 30, isSolo);
 
-    // カードが見える位置にスクロール
+    // Scroll card into view
     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
-  // ===== お一人様カード特別演出 =====
+  // ===== Solo Card Special Reveal =====
   function revealSoloCard(card, wrapper) {
-    // スクロールしてフォーカス
+    // Scroll into focus
     wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    // ドラムロール
+    // Drumroll
     if (soundEnabled) playDrumroll();
 
-    // スポットライトアニメーション
+    // Spotlight animation
     wrapper.classList.add('solo-spotlight');
 
-    // 1.5秒後にフリップ
+    // Flip after 1.5s
     setTimeout(function () {
       flipCard(card, true);
 
-      // フリップ後少し待って完了演出
+      // Wait briefly after flip, then trigger completion
       setTimeout(function () {
         isRevealing = false;
         onAllRevealed();
@@ -326,7 +326,7 @@
     spawnConfetti(window.innerWidth / 2, window.innerHeight / 2, 200, false);
   }
 
-  // ===== もう一度 =====
+  // ===== Retry =====
   function retry() {
     pairs = generatePairs(employees);
     totalCards = pairs.length;
@@ -338,13 +338,13 @@
     renderCards();
   }
 
-  // ===== サウンド ON/OFF =====
+  // ===== Sound Toggle =====
   function toggleSound() {
     soundEnabled = !soundEnabled;
     soundToggleBtn.textContent = soundEnabled ? '🔊 ON' : '🔇 OFF';
   }
 
-  // ===== Web Audio API 効果音 =====
+  // ===== Web Audio API Sound Effects =====
   function getAudioCtx() {
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -427,7 +427,7 @@
     } catch (e) {}
   }
 
-  // ===== 紙吹雪 (Canvas パーティクル) =====
+  // ===== Confetti (Canvas Particles) =====
   var particles = [];
   var animating = false;
 
@@ -485,7 +485,7 @@
     }
   }
 
-  // ===== 起動 =====
+  // ===== Boot =====
   init();
 })();
 </script>

@@ -1,5 +1,5 @@
 <style>
-/* ===== リセット & ベース ===== */
+/* ===== Reset & Base ===== */
 * {
   margin: 0;
   padding: 0;
@@ -14,7 +14,7 @@ body {
   overflow-x: hidden;
 }
 
-/* ===== 画面切替 ===== */
+/* ===== Screen Switching ===== */
 .screen {
   display: none;
   min-height: 100vh;
@@ -33,7 +33,7 @@ body {
   padding-top: 30px;
 }
 
-/* ===== スタート画面 ===== */
+/* ===== Start Screen ===== */
 .start-container {
   text-align: center;
   animation: fadeInUp 1s ease-out;
@@ -99,7 +99,7 @@ body {
   min-height: 1.4em;
 }
 
-/* ===== カード画面 ===== */
+/* ===== Card Screen ===== */
 .screen-title {
   text-align: center;
   font-size: 1.5rem;
@@ -118,7 +118,7 @@ body {
   padding: 0 10px;
 }
 
-/* ===== カード ===== */
+/* ===== Card ===== */
 .card-wrapper {
   perspective: 1000px;
   opacity: 0;
@@ -151,7 +151,7 @@ body {
   overflow: hidden;
 }
 
-/* --- 裏面（未フリップ） --- */
+/* --- Front Face (unflipped) --- */
 .card-front {
   background: linear-gradient(135deg, #2a2d6e, #3d2e7c);
   border: 2px solid rgba(255, 215, 0, 0.3);
@@ -174,7 +174,7 @@ body {
   font-weight: 700;
 }
 
-/* --- 裏面（お一人様） --- */
+/* --- Front Face (solo) --- */
 .card-front.solo-front {
   background: linear-gradient(135deg, #4e1a3a, #6e2e5c);
   border-color: rgba(255, 130, 180, 0.4);
@@ -198,7 +198,7 @@ body {
   letter-spacing: 0.05em;
 }
 
-/* 未フリップのパルスアニメーション */
+/* Pulse animation for unflipped cards */
 .card:not(.flipped) .card-front {
   animation: pulse 2s ease-in-out infinite;
 }
@@ -216,7 +216,7 @@ body {
   }
 }
 
-/* --- 表面（ペアカード） --- */
+/* --- Back Face (pair card) --- */
 .card-back {
   background: linear-gradient(135deg, #1a3a5c, #1e5a8a);
   border: 2px solid rgba(100, 200, 255, 0.4);
@@ -247,7 +247,7 @@ body {
   margin: 4px 0;
 }
 
-/* --- お一人様カード --- */
+/* --- Solo Card --- */
 .card-back.solo {
   background: linear-gradient(135deg, #5c1a3a, #8a1e5a);
   border-color: rgba(255, 130, 180, 0.5);
@@ -263,7 +263,7 @@ body {
   margin-bottom: 8px;
 }
 
-/* --- お一人様カード: スポットライト演出 --- */
+/* --- Solo Card: Spotlight Effect --- */
 .card-wrapper.solo-spotlight {
   opacity: 1;
   animation: soloSpotlight 1.5s ease-in-out;
@@ -276,7 +276,7 @@ body {
   100% { transform: scale(1); filter: brightness(1); }
 }
 
-/* ===== コントロール ===== */
+/* ===== Controls ===== */
 .controls {
   display: flex;
   justify-content: center;
@@ -307,7 +307,7 @@ body {
   cursor: not-allowed;
 }
 
-/* めくるボタン強調 */
+/* Reveal button emphasis */
 .btn-reveal {
   background: linear-gradient(135deg, #ffd700, #ffaa00);
   color: #0a0e27;
@@ -322,13 +322,13 @@ body {
   box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
 }
 
-/* ===== スプレッドシートリンク ===== */
+/* ===== Spreadsheet Link ===== */
 .sheet-link {
   text-decoration: none;
   display: inline-block;
 }
 
-/* ===== トースト通知 ===== */
+/* ===== Toast Notification ===== */
 .toast {
   position: fixed;
   top: 24px;
@@ -357,7 +357,7 @@ body {
   transform: translateX(-50%) translateY(0);
 }
 
-/* ===== 完了メッセージ ===== */
+/* ===== Completion Message ===== */
 .complete-message {
   text-align: center;
   font-size: 1.8rem;
@@ -375,7 +375,7 @@ body {
   opacity: 1;
 }
 
-/* ===== 紙吹雪Canvas ===== */
+/* ===== Confetti Canvas ===== */
 #confetti-canvas {
   position: fixed;
   top: 0;
@@ -386,7 +386,7 @@ body {
   z-index: 9999;
 }
 
-/* ===== アニメーション ===== */
+/* ===== Animations ===== */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -418,7 +418,7 @@ body {
   }
 }
 
-/* ===== レスポンシブ ===== */
+/* ===== Responsive ===== */
 @media (max-width: 600px) {
   .main-title {
     font-size: 2.2rem;
