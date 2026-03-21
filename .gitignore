@@ -1,0 +1,14 @@
+# clasp
+.clasp.json
+
+# Node.js (clasp install)
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*~
