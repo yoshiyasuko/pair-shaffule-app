@@ -14,7 +14,7 @@ function getSpreadsheetId_() {
  * Web App entry point
  */
 function doGet() {
-  return HtmlService.createTemplateFromFile('Index')
+  return HtmlService.createTemplateFromFile('client/Index')
     .evaluate()
     .setTitle('ペアリング抽選会')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
