@@ -20,12 +20,12 @@ clasp open --webapp # デプロイ済みWebアプリを開く
 
 ## アーキテクチャ
 
-- **Code.js** — サーバーサイドGAS関数。`doGet()`でWebアプリを配信。`getEmployeeList()`でスプレッドシートからメンバーリストを取得（A列=チェックボックス有効、B列=名前）。スプレッドシートIDはスクリプトプロパティ（`SPREADSHEET_ID`）から取得。
-- **Index.html** — メインHTMLテンプレート。GASの`include()`ヘルパーでCSS/JSをインライン展開。
-- **Stylesheet.html** — 全CSS（`<?!= include('Stylesheet'); ?>`でインライン化）。
-- **JavaScript.html** — 全クライアントサイドJS（`<?!= include('JavaScript'); ?>`でインライン化）。単一のIIFEで、状態管理・Fisher-Yatesシャッフル・ペア生成・カード描画・Web Audio API効果音・Canvas紙吹雪アニメーションを含む。
-- **appsscript.json** — GASマニフェスト（タイムゾーン: Asia/Tokyo、ランタイム: V8、Webアプリアクセス: MYSELF）。
-- **.clasp.json** — clasp設定（スクリプトID）。
+- **src/server/Code.js** — サーバーサイドGAS関数。`doGet()`でWebアプリを配信。`getEmployeeList()`でスプレッドシートからメンバーリストを取得（A列=チェックボックス有効、B列=名前）。スプレッドシートIDはスクリプトプロパティ（`SPREADSHEET_ID`）から取得。
+- **src/client/Index.html** — メインHTMLテンプレート。GASの`include()`ヘルパーでCSS/JSをインライン展開。
+- **src/client/Stylesheet.html** — 全CSS（`<?!= include('Stylesheet'); ?>`でインライン化）。
+- **src/client/JavaScript.html** — 全クライアントサイドJS（`<?!= include('JavaScript'); ?>`でインライン化）。単一のIIFEで、状態管理・Fisher-Yatesシャッフル・ペア生成・カード描画・Web Audio API効果音・Canvas紙吹雪アニメーションを含む。
+- **src/appsscript.json** — GASマニフェスト（タイムゾーン: Asia/Tokyo、ランタイム: V8、Webアプリアクセス: MYSELF）。
+- **.clasp.json** — clasp設定（スクリプトID、`rootDir: "src"`）。
 
 ## 設計上のポイント
 
