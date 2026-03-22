@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## プロジェクト概要
 
-Google Apps Script (GAS) のWebアプリ。Google スプレッドシートの「Members」シートから社員リストを読み込み、ランダムにペアを生成してカードめくりアニメーションで発表する。
+Google Apps Script (GAS) のWebアプリ。Google スプレッドシートの「Members」シートからメンバーリストを読み込み、ランダムにペアを生成してカードめくりアニメーションで発表する。
 
 ## デプロイ
 
@@ -20,7 +20,7 @@ clasp open --webapp # デプロイ済みWebアプリを開く
 
 ## アーキテクチャ
 
-- **Code.js** — サーバーサイドGAS関数。`doGet()`でWebアプリを配信。`getEmployeeList()`でスプレッドシートから社員リストを取得（A列=チェックボックス有効、B列=名前）。スプレッドシートIDはスクリプトプロパティ（`SPREADSHEET_ID`）から取得。
+- **Code.js** — サーバーサイドGAS関数。`doGet()`でWebアプリを配信。`getEmployeeList()`でスプレッドシートからメンバーリストを取得（A列=チェックボックス有効、B列=名前）。スプレッドシートIDはスクリプトプロパティ（`SPREADSHEET_ID`）から取得。
 - **Index.html** — メインHTMLテンプレート。GASの`include()`ヘルパーでCSS/JSをインライン展開。
 - **Stylesheet.html** — 全CSS（`<?!= include('Stylesheet'); ?>`でインライン化）。
 - **JavaScript.html** — 全クライアントサイドJS（`<?!= include('JavaScript'); ?>`でインライン化）。単一のIIFEで、状態管理・Fisher-Yatesシャッフル・ペア生成・カード描画・Web Audio API効果音・Canvas紙吹雪アニメーションを含む。
