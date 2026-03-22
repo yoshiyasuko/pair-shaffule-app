@@ -97,12 +97,12 @@
       .withSuccessHandler(function (list) {
         employees = list;
         reloadBtn.disabled = false;
-        reloadBtn.textContent = '🔄 社員リスト再読み込み';
+        reloadBtn.textContent = '🔄 メンバーリスト再読み込み';
         if (employees.length < 2) {
           showToast('参加者が足りません（2名以上必要です）', true);
           return;
         }
-        showToast('社員リストを再読み込みしました（' + employees.length + '名）', false);
+        showToast('メンバーリストを再読み込みしました（' + employees.length + '名）', false);
         // Re-shuffle and reset to ready-to-flip state
         pairs = generatePairs(employees);
         totalCards = pairs.length;
@@ -115,7 +115,7 @@
       })
       .withFailureHandler(function (err) {
         reloadBtn.disabled = false;
-        reloadBtn.textContent = '🔄 社員リスト再読み込み';
+        reloadBtn.textContent = '🔄 メンバーリスト再読み込み';
         showToast('再読み込みに失敗しました: ' + (err.message || ''), true);
       })
       .getEmployeeList();

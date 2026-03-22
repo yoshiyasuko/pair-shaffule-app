@@ -54,6 +54,6 @@ function getEmployeeList() {
       .map(row => row[1].toString().trim())
       .filter(name => name.length > 0);
   } catch (e) {
-    throw new Error('社員リストの取得に失敗しました: ' + e.message);
+    throw new Error('メンバーリストの取得に失敗しました: ' + e.message);
   }
 }
