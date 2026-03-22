@@ -100,14 +100,6 @@ body {
 }
 
 /* ===== Card Screen ===== */
-.screen-title {
-  text-align: center;
-  font-size: 1.5rem;
-  color: #ffd700;
-  margin-bottom: 30px;
-  animation: fadeInUp 0.6s ease-out;
-}
-
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -309,11 +301,14 @@ body {
 
 /* Reveal button emphasis */
 .btn-reveal {
+  display: block;
+  margin: 0 auto 24px;
   background: linear-gradient(135deg, #ffd700, #ffaa00);
   color: #0a0e27;
   border-color: transparent;
-  font-size: 1.1rem;
-  padding: 14px 36px;
+  font-size: 1.3rem;
+  padding: 18px 48px;
+  animation: fadeInUp 0.6s ease-out;
 }
 
 .btn-reveal:hover:not(:disabled) {
