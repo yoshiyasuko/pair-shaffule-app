@@ -245,6 +245,7 @@
     if (isRevealing) return;
     isRevealing = true;
     revealBtn.disabled = true;
+    retryBtn.disabled = true;
 
     var cards = Array.from(cardGrid.querySelectorAll('.card:not(.flipped)'));
     var delay = 0;
@@ -320,6 +321,7 @@
 
   function onAllRevealed() {
     revealBtn.disabled = true;
+    retryBtn.disabled = false;
     completeMessage.textContent = '🎉 全ペア発表完了！ 🎉';
     completeMessage.classList.add('visible');
     if (soundEnabled) playFanfareSound();
