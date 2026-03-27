@@ -487,7 +487,79 @@
     }
   }
 
+  // ===== Background Particles (Stars & Gold Dust) =====
+  var bgCanvas = document.getElementById('bg-particles');
+  var bgCtx = bgCanvas.getContext('2d');
+  var bgParticles = [];
+  var BG_PARTICLE_COUNT = 60;
+
+  function resizeBgCanvas() {
+    bgCanvas.width = window.innerWidth;
+    bgCanvas.height = window.innerHeight;
+  }
+
+  function initBgParticles() {
+    resizeBgCanvas();
+    window.addEventListener('resize', resizeBgCanvas);
+    bgParticles = [];
+    for (var i = 0; i < BG_PARTICLE_COUNT; i++) {
+      bgParticles.push(createBgParticle());
+    }
+    animateBgParticles();
+  }
+
+  function createBgParticle() {
+    return {
+      x: Math.random() * bgCanvas.width,
+      y: Math.random() * bgCanvas.height,
+      size: Math.random() * 2.5 + 0.5,
+      speedY: -(Math.random() * 0.3 + 0.1),
+      speedX: (Math.random() - 0.5) * 0.2,
+      opacity: Math.random() * 0.6 + 0.1,
+      flickerSpeed: Math.random() * 0.02 + 0.005,
+      flickerOffset: Math.random() * Math.PI * 2,
+      gold: Math.random() > 0.3
+    };
+  }
+
+  function animateBgParticles() {
+    bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+    var time = Date.now() * 0.001;
+    for (var i = 0; i < bgParticles.length; i++) {
+      var p = bgParticles[i];
+      p.x += p.speedX;
+      p.y += p.speedY;
+
+      if (p.y < -10) {
+        p.y = bgCanvas.height + 10;
+        p.x = Math.random() * bgCanvas.width;
+      }
+      if (p.x < -10) p.x = bgCanvas.width + 10;
+      if (p.x > bgCanvas.width + 10) p.x = -10;
+
+      var flicker = Math.sin(time * p.flickerSpeed * 60 + p.flickerOffset) * 0.3 + 0.7;
+      bgCtx.beginPath();
+      bgCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      if (p.gold) {
+        bgCtx.fillStyle = 'rgba(255, 215, 0, ' + (p.opacity * flicker) + ')';
+      } else {
+        bgCtx.fillStyle = 'rgba(255, 255, 255, ' + (p.opacity * flicker * 0.6) + ')';
+      }
+      bgCtx.fill();
+
+      // Glow effect for larger particles
+      if (p.size > 1.5 && p.gold) {
+        bgCtx.beginPath();
+        bgCtx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
+        bgCtx.fillStyle = 'rgba(255, 215, 0, ' + (p.opacity * flicker * 0.1) + ')';
+        bgCtx.fill();
+      }
+    }
+    requestAnimationFrame(animateBgParticles);
+  }
+
   // ===== Boot =====
+  initBgParticles();
   init();
 })();
 </script>
