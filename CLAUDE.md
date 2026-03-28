@@ -44,11 +44,18 @@ GitHub Actionsにより、mainブランチへのPRマージ時に自動でproduc
 
 **汎用スキル**（`git-workflow` プラグイン提供）:
 
+> **初回セットアップが必要**: 以下のコマンドでプラグインをインストールしてください。
+> ```
+> /plugin marketplace add yoshiyasuko/claude-code-git-workflow-plugins
+> /plugin install git-workflow
+> /reload-plugins
+> ```
+
 | コマンド | 概要 |
 |---------|------|
-| `/commit` | Conventional Commits形式でコミットを作成。`$ARGUMENTS` で `skip-hooks`/`skip-push` モード制御が可能。 |
-| `/create-pr` | PRを作成・更新する。未コミット変更の処理からPR作成までを自動化。既存PRがあれば本文を更新する。 |
-| `/sync-main` | mainブランチに切り替えて最新化し、リモートで削除済みのローカルブランチをクリーンアップする。 |
+| `/git-workflow:commit` | Conventional Commits形式でコミットを作成。`$ARGUMENTS` で `skip-hooks`/`skip-push` モード制御が可能。 |
+| `/git-workflow:create-pr` | PRを作成・更新する。未コミット変更の処理からPR作成までを自動化。既存PRがあれば本文を更新する。 |
+| `/git-workflow:sync-main` | mainブランチに切り替えて最新化し、リモートで削除済みのローカルブランチをクリーンアップする。 |
 
 **プロジェクト固有スキル**（`.claude/commands/`）:
 
@@ -71,11 +78,11 @@ GitHub Actionsにより、mainブランチへのPRマージ時に自動でproduc
 ### スキル間の連携
 
 ```
-/commit → [pre-commit hook] → (プッシュ確認) → [post-push hook]
-/deploy → (未コミット検出時) → /commit (skip-push skip-hooks) → デプロイ続行
-/preview-deploy → (未コミット検出時) → /commit (skip-push skip-hooks) → プレビューデプロイ続行
+/git-workflow:commit → [pre-commit hook] → (プッシュ確認) → [post-push hook]
+/deploy → (未コミット検出時) → /git-workflow:commit (skip-push skip-hooks) → デプロイ続行
+/preview-deploy → (未コミット検出時) → /git-workflow:commit (skip-push skip-hooks) → プレビューデプロイ続行
 /kill-all-preview → プレビューデプロイの一括削除
-/create-pr → (未コミット検出時) → /commit (skip-push skip-hooks) → push → PR作成 → [post-pr hook]
+/git-workflow:create-pr → (未コミット検出時) → /git-workflow:commit (skip-push skip-hooks) → push → PR作成 → [post-pr hook]
 ```
 
 どちらのデプロイスキルからでも開始でき、必要に応じて `/commit` を呼び出す。
