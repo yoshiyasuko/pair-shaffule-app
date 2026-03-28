@@ -1,0 +1,46 @@
+name: Deploy to Google Apps Script
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    # PRマージ時のみ実行（クローズのみは除外）、または手動実行
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true)
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install clasp
+        run: npm install -g @google/clasp
+
+      - name: Authenticate with clasp
+        run: echo '${{ secrets.CLASPRC_JSON }}' > ~/.clasprc.json
+
+      - name: Push to GAS
+        run: clasp push
+
+      - name: Deploy to production
+        env:
+          DEPLOYMENT_ID: ${{ secrets.GAS_DEPLOYMENT_ID }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if [ -n "$PR_TITLE" ]; then
+            DESCRIPTION="$PR_TITLE"
+          else
+            DESCRIPTION="Manual deploy from ${GITHUB_SHA::7} ($(date -u +%Y-%m-%d))"
+          fi
+          clasp deploy -i "$DEPLOYMENT_ID" -d "$DESCRIPTION"
