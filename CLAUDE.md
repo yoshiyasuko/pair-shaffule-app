@@ -18,6 +18,10 @@ clasp open          # GASエディタで開く
 clasp open --webapp # デプロイ済みWebアプリを開く
 ```
 
+### CI/CD 自動デプロイ
+
+GitHub Actionsにより、mainブランチへのPRマージ時に自動でproductionデプロイが実行される。手動実行（workflow_dispatch）も可能。認証にはOAuthリフレッシュトークンを使用（GitHub Secretsに `CLASPRC_JSON` と `GAS_DEPLOYMENT_ID` を設定）。
+
 ## アーキテクチャ
 
 - **src/server/Code.js** — サーバーサイドGAS関数。`doGet()`でWebアプリを配信。`getEmployeeList()`でスプレッドシートからメンバーリストを取得（A列=チェックボックス有効、B列=名前）。`exportPairsToSpreadsheet()`でペア結果をテンプレートスプレッドシートのコピーに出力。スクリプトプロパティ: `SPREADSHEET_ID`（メンバーリスト）、`EXPORT_TEMPLATE_SPREADSHEET_ID`（エクスポート用テンプレート）。
@@ -26,6 +30,7 @@ clasp open --webapp # デプロイ済みWebアプリを開く
 - **src/client/JavaScript.html** — 全クライアントサイドJS（`<?!= include('JavaScript'); ?>`でインライン化）。単一のIIFEで、状態管理・Fisher-Yatesシャッフル・ペア生成・カード描画・Web Audio API効果音・Canvas紙吹雪アニメーションを含む。
 - **src/appsscript.json** — GASマニフェスト（タイムゾーン: Asia/Tokyo、ランタイム: V8、Webアプリアクセス: MYSELF、OAuthスコープ: spreadsheets・drive）。
 - **.clasp.json** — clasp設定（スクリプトID、`rootDir: "src"`）。
+- **.github/workflows/deploy.yml** — GitHub Actionsワークフロー。mainへのPRマージ時にclasp push→deployを自動実行。
 
 ## 設計上のポイント
 
