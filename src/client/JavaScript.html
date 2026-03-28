@@ -22,6 +22,7 @@
   const retryBtn = document.getElementById('retry-btn');
   const reloadBtn = document.getElementById('reload-btn');
   const sheetLink = document.getElementById('sheet-link');
+  const exportBtn = document.getElementById('export-btn');
   const toast = document.getElementById('toast');
   const completeMessage = document.getElementById('complete-message');
   const confettiCanvas = document.getElementById('confetti-canvas');
@@ -35,6 +36,7 @@
     revealBtn.addEventListener('click', revealAll);
     soundToggleBtn.addEventListener('click', toggleSound);
     retryBtn.addEventListener('click', retry);
+    exportBtn.addEventListener('click', exportPairs);
     reloadBtn.addEventListener('click', reloadEmployees);
     loadEmployees();
     loadSheetLink();
@@ -111,6 +113,7 @@
         revealBtn.disabled = false;
         completeMessage.classList.remove('visible');
         completeMessage.textContent = '';
+        exportBtn.style.display = 'none';
         renderCards();
       })
       .withFailureHandler(function (err) {
@@ -324,6 +327,7 @@
     retryBtn.disabled = false;
     completeMessage.textContent = '🎉 全ペア発表完了！ 🎉';
     completeMessage.classList.add('visible');
+    exportBtn.style.display = 'inline-block';
     if (soundEnabled) playFanfareSound();
     spawnConfetti(window.innerWidth / 2, window.innerHeight / 2, 200, false);
   }
@@ -337,7 +341,27 @@
     revealBtn.disabled = false;
     completeMessage.classList.remove('visible');
     completeMessage.textContent = '';
+    exportBtn.style.display = 'none';
     renderCards();
+  }
+
+  // ===== Export to Spreadsheet =====
+  function exportPairs() {
+    exportBtn.disabled = true;
+    exportBtn.textContent = '📊 出力中...';
+    google.script.run
+      .withSuccessHandler(function (url) {
+        exportBtn.disabled = false;
+        exportBtn.textContent = '📊 抽選結果をスプレッドシートに出力';
+        showToast('スプレッドシートに出力しました');
+        window.open(url, '_blank');
+      })
+      .withFailureHandler(function (err) {
+        exportBtn.disabled = false;
+        exportBtn.textContent = '📊 抽選結果をスプレッドシートに出力';
+        showToast('出力に失敗しました: ' + (err.message || ''), true);
+      })
+      .exportPairsToSpreadsheet(pairs);
   }
 
   // ===== Sound Toggle =====
