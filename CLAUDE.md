@@ -40,26 +40,49 @@ GitHub Actionsにより、mainブランチへのPRマージ時に自動でproduc
 
 ## スキル（スラッシュコマンド）
 
-`.claude/commands/` にプロジェクト固有のスキルを定義している。`/<スキル名>` で呼び出す。
+プロジェクト固有スキルは `.claude/commands/` に、汎用スキルは `git-workflow` プラグイン（`claude-code-git-workflow-plugins` リポジトリ）から提供される。`/<スキル名>` で呼び出す。
+
+**汎用スキル**（`git-workflow` プラグイン提供）:
+
+> **初回セットアップが必要**: 以下のコマンドでプラグインをインストールしてください。
+> ```
+> /plugin marketplace add yoshiyasuko/claude-code-git-workflow-plugins
+> /plugin install git-workflow
+> /reload-plugins
+> ```
 
 | コマンド | 概要 |
 |---------|------|
-| `/commit` | Conventional Commits形式でコミットを作成。変更を論理単位に分割し、プッシュ・デプロイまで一気通貫で実行できる。 |
+| `/git-workflow:commit` | Conventional Commits形式でコミットを作成。`$ARGUMENTS` で `skip-hooks`/`skip-push` モード制御が可能。 |
+| `/git-workflow:create-pr` | PRを作成・更新する。未コミット変更の処理からPR作成までを自動化。既存PRがあれば本文を更新する。 |
+| `/git-workflow:sync-main` | mainブランチに切り替えて最新化し、リモートで削除済みのローカルブランチをクリーンアップする。 |
+
+**プロジェクト固有スキル**（`.claude/commands/`）:
+
+| コマンド | 概要 |
+|---------|------|
 | `/deploy` | GASへのproductionデプロイを実行。未コミット変更の検出→commit→git push→clasp push→clasp deployの一連のフローを自動化。 |
 | `/preview-deploy` | GASへのプレビューデプロイを作成。productionデプロイとは別に `[PREVIEW]` プレフィックス付きデプロイを作成・管理する。 |
 | `/kill-all-preview` | プレビューデプロイを全て削除。`[PREVIEW]` プレフィックス付きデプロイのみを対象とし、productionデプロイには触れない。 |
-| `/update-docs` | コード変更後にREADME.md/CLAUDE.mdの更新が必要かを判断し、必要なら更新する。変更がない場合はドキュメントと実態の整合性を検証する。`/commit` からも自動呼び出しされる。 |
-| `/create-pr` | PRを作成・更新する。未コミット変更の処理からPR作成、プレビューデプロイまでの一連のフローを自動化。既存PRがあれば本文を更新する。 |
-| `/sync-main` | mainブランチに切り替えて最新化し、リモートで削除済みのローカルブランチをクリーンアップする。 |
+| `/update-docs` | コード変更後にREADME.md/CLAUDE.mdの更新が必要かを判断し、必要なら更新する。変更がない場合はドキュメントと実態の整合性を検証する。 |
+
+### スキルフック（`.claude/skill-hooks.md`）
+
+汎用スキルはプロジェクト固有スキルをハードコードせず、`.claude/skill-hooks.md` のライフサイクルフック設定を通じて連携する。これにより汎用スキルをプラグインとして他プロジェクトでも再利用可能にしている。
+
+現在の設定:
+- `commit` の `pre-commit` → `update-docs`（コミット前にドキュメント更新チェック）
+- `commit` の `post-push` → `deploy`（プッシュ後にデプロイ確認）
+- `create-pr` の `post-pr` → `preview-deploy`（PR作成後にプレビューデプロイ確認）
 
 ### スキル間の連携
 
 ```
-/commit → /update-docs → (プッシュ確認) → (デプロイ確認) → /deploy
-/deploy → (未コミット検出時) → /commit → デプロイ続行
-/preview-deploy → (未コミット検出時) → /commit → プレビューデプロイ続行
+/git-workflow:commit → [pre-commit hook] → (プッシュ確認) → [post-push hook]
+/deploy → (未コミット検出時) → /git-workflow:commit (skip-push skip-hooks) → デプロイ続行
+/preview-deploy → (未コミット検出時) → /git-workflow:commit (skip-push skip-hooks) → プレビューデプロイ続行
 /kill-all-preview → プレビューデプロイの一括削除
-/create-pr → (未コミット検出時) → /commit → push → PR作成 → /preview-deploy
+/git-workflow:create-pr → (未コミット検出時) → /git-workflow:commit (skip-push skip-hooks) → push → PR作成 → [post-pr hook]
 ```
 
 どちらのデプロイスキルからでも開始でき、必要に応じて `/commit` を呼び出す。
