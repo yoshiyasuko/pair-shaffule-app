@@ -79,6 +79,14 @@ EOF
 )"
 ```
 
+次に、assigneeが設定されていなければ自分をassignする：
+```bash
+# assigneesが空の場合のみ設定
+gh pr view <PR番号> --json assignees --jq '.assignees[].login' | head -1
+# 出力が空なら:
+gh pr edit <PR番号> --add-assignee @me
+```
+
 更新後、手順9へ進む。
 
 ### 7. リモートへのプッシュ
@@ -111,7 +119,7 @@ PRのタイトルはConventional Commits形式（`<type>(<scope>): <subject>`）
 ```
 
 ```bash
-gh pr create --base <ベースブランチ> --title "<タイトル>" --body "$(cat <<'EOF'
+gh pr create --base <ベースブランチ> --assignee @me --title "<タイトル>" --body "$(cat <<'EOF'
 ## 変更概要
 - ...
 EOF
