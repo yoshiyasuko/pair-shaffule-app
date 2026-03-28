@@ -44,6 +44,7 @@ clasp open --webapp # デプロイ済みWebアプリを開く
 | `/preview-deploy` | GASへのプレビューデプロイを作成。productionデプロイとは別に `[PREVIEW]` プレフィックス付きデプロイを作成・管理する。 |
 | `/kill-all-preview` | プレビューデプロイを全て削除。`[PREVIEW]` プレフィックス付きデプロイのみを対象とし、productionデプロイには触れない。 |
 | `/update-docs` | コード変更後にREADME.md/CLAUDE.mdの更新が必要かを判断し、必要なら更新する。`/commit` からも自動呼び出しされる。 |
+| `/create-pr` | PRを作成・更新する。未コミット変更の処理からPR作成、プレビューデプロイまでの一連のフローを自動化。既存PRがあれば本文を更新する。 |
 
 ### スキル間の連携
 
@@ -52,6 +53,7 @@ clasp open --webapp # デプロイ済みWebアプリを開く
 /deploy → (未コミット検出時) → /commit → デプロイ続行
 /preview-deploy → (未コミット検出時) → /commit → プレビューデプロイ続行
 /kill-all-preview → プレビューデプロイの一括削除
+/create-pr → (未コミット検出時) → /commit → push → PR作成 → /preview-deploy
 ```
 
 どちらのデプロイスキルからでも開始でき、必要に応じて `/commit` を呼び出す。
