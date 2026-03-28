@@ -30,6 +30,9 @@ jobs:
       - name: Authenticate with clasp
         run: echo '${{ secrets.CLASPRC_JSON }}' > ~/.clasprc.json
 
+      - name: Setup clasp project
+        run: echo '${{ secrets.CLASP_JSON }}' > .clasp.json
+
       - name: Push to GAS
         run: clasp push
 
