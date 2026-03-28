@@ -1,5 +1,7 @@
 # ペア抽選アプリ
 
+[![Deploy](https://github.com/yoshiyasuko/pair-shaffule-app/actions/workflows/deploy.yml/badge.svg)](https://github.com/yoshiyasuko/pair-shaffule-app/actions/workflows/deploy.yml)
+
 Google スプレッドシートのメンバーリストからランダムにペアを生成し、カードめくりアニメーションで発表する Google Apps Script Webアプリ。
 
 ## 機能
