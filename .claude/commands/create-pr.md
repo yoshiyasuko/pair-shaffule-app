@@ -41,19 +41,20 @@ gh pr list --head <現在のブランチ> --base <ベースブランチ> --state
 
 ### 6. 既存PRの更新
 
-リモートとの差分を同期してからPR本文を更新する。
+まずベースブランチの最新を取得し、rebaseしてからプッシュする。ベースブランチのrebaseを行わないと、差分分析が古いベースに基づいてしまい、PRタイトル・本文が実際の差分と乖離する。
 
 ```bash
-git pull --rebase origin <現在のブランチ>
-git push
+git fetch origin <ベースブランチ>
+git rebase origin/<ベースブランチ>
+git push --force-with-lease
 ```
 
-pull/pushでエラーが出た場合は状況を表示してユーザーに判断を委ねる（コンフリクトの解消が必要な場合があるため）。
+rebaseでコンフリクトが発生した場合は状況を表示してユーザーに判断を委ねる。
 
 次に、ベースブランチとの差分を分析してPRのタイトルと本文を再生成する：
 ```bash
-git log <ベースブランチ>...HEAD --oneline
-git diff <ベースブランチ>...HEAD
+git log origin/<ベースブランチ>...HEAD --oneline
+git diff origin/<ベースブランチ>...HEAD
 ```
 
 差分の分析結果からPRを更新する：
@@ -69,18 +70,22 @@ EOF
 
 ### 7. リモートへのプッシュ
 
+まずベースブランチの最新を取得してrebaseし、最新の差分でPRを作成できるようにする。
+
 ```bash
+git fetch origin <ベースブランチ>
+git rebase origin/<ベースブランチ>
 git push -u origin <現在のブランチ>
 ```
 
-プッシュに失敗した場合はエラーを表示して処理を終了する。
+rebaseでコンフリクトが発生した場合は状況を表示してユーザーに判断を委ねる。プッシュに失敗した場合はエラーを表示して処理を終了する。
 
 ### 8. PR作成
 
 ベースブランチからの全変更を分析し、PRタイトルと本文を生成する：
 ```bash
-git log <ベースブランチ>...HEAD --oneline
-git diff <ベースブランチ>...HEAD
+git log origin/<ベースブランチ>...HEAD --oneline
+git diff origin/<ベースブランチ>...HEAD
 ```
 
 PRのタイトルはConventional Commits形式（`<type>(<scope>): <subject>`）で英語で記述する。70文字以内に収める。本文は日本語で、変更の「何を」ではなく「なぜ」「何のために」を重視する。
