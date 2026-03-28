@@ -20,11 +20,11 @@ clasp open --webapp # デプロイ済みWebアプリを開く
 
 ## アーキテクチャ
 
-- **src/server/Code.js** — サーバーサイドGAS関数。`doGet()`でWebアプリを配信。`getEmployeeList()`でスプレッドシートからメンバーリストを取得（A列=チェックボックス有効、B列=名前）。スプレッドシートIDはスクリプトプロパティ（`SPREADSHEET_ID`）から取得。
+- **src/server/Code.js** — サーバーサイドGAS関数。`doGet()`でWebアプリを配信。`getEmployeeList()`でスプレッドシートからメンバーリストを取得（A列=チェックボックス有効、B列=名前）。`exportPairsToSpreadsheet()`でペア結果をテンプレートスプレッドシートのコピーに出力。スクリプトプロパティ: `SPREADSHEET_ID`（メンバーリスト）、`EXPORT_TEMPLATE_SPREADSHEET_ID`（エクスポート用テンプレート）。
 - **src/client/Index.html** — メインHTMLテンプレート。GASの`include()`ヘルパーでCSS/JSをインライン展開。
 - **src/client/Stylesheet.html** — 全CSS（`<?!= include('Stylesheet'); ?>`でインライン化）。
 - **src/client/JavaScript.html** — 全クライアントサイドJS（`<?!= include('JavaScript'); ?>`でインライン化）。単一のIIFEで、状態管理・Fisher-Yatesシャッフル・ペア生成・カード描画・Web Audio API効果音・Canvas紙吹雪アニメーションを含む。
-- **src/appsscript.json** — GASマニフェスト（タイムゾーン: Asia/Tokyo、ランタイム: V8、Webアプリアクセス: MYSELF）。
+- **src/appsscript.json** — GASマニフェスト（タイムゾーン: Asia/Tokyo、ランタイム: V8、Webアプリアクセス: MYSELF、OAuthスコープ: spreadsheets・drive）。
 - **.clasp.json** — clasp設定（スクリプトID、`rootDir: "src"`）。
 
 ## 設計上のポイント
@@ -40,13 +40,18 @@ clasp open --webapp # デプロイ済みWebアプリを開く
 | コマンド | 概要 |
 |---------|------|
 | `/commit` | Conventional Commits形式でコミットを作成。変更を論理単位に分割し、プッシュ・デプロイまで一気通貫で実行できる。 |
-| `/deploy` | GASへのデプロイを実行。未コミット変更の検出→commit→git push→clasp push→clasp deployの一連のフローを自動化。 |
+| `/deploy` | GASへのproductionデプロイを実行。未コミット変更の検出→commit→git push→clasp push→clasp deployの一連のフローを自動化。 |
+| `/preview-deploy` | GASへのプレビューデプロイを作成。productionデプロイとは別に `[PREVIEW]` プレフィックス付きデプロイを作成・管理する。 |
+| `/kill-all-preview` | プレビューデプロイを全て削除。`[PREVIEW]` プレフィックス付きデプロイのみを対象とし、productionデプロイには触れない。 |
+| `/update-docs` | コード変更後にREADME.md/CLAUDE.mdの更新が必要かを判断し、必要なら更新する。`/commit` からも自動呼び出しされる。 |
 
 ### スキル間の連携
 
 ```
-/commit → (プッシュ確認) → (デプロイ確認) → /deploy
+/commit → /update-docs → (プッシュ確認) → (デプロイ確認) → /deploy
 /deploy → (未コミット検出時) → /commit → デプロイ続行
+/preview-deploy → (未コミット検出時) → /commit → プレビューデプロイ続行
+/kill-all-preview → プレビューデプロイの一括削除
 ```
 
-どちらのスキルからでも開始でき、必要に応じて互いを呼び出す。
+どちらのデプロイスキルからでも開始でき、必要に応じて `/commit` を呼び出す。
