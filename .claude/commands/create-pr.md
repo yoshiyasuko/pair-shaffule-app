@@ -41,15 +41,28 @@ gh pr list --head <現在のブランチ> --base <ベースブランチ> --state
 
 ### 6. 既存PRの更新
 
-まずベースブランチの最新を取得し、rebaseしてからプッシュする。ベースブランチのrebaseを行わないと、差分分析が古いベースに基づいてしまい、PRタイトル・本文が実際の差分と乖離する。
+まずベースブランチの最新を取得する。fetchすることで `origin/<ベースブランチ>` が最新になり、差分分析が正確になる。
 
 ```bash
 git fetch origin <ベースブランチ>
-git rebase origin/<ベースブランチ>
-git push --force-with-lease
 ```
 
-rebaseでコンフリクトが発生した場合は状況を表示してユーザーに判断を委ねる。
+次に、ベースブランチが自分のブランチより先に進んでいるかを確認する：
+```bash
+git merge-base --is-ancestor origin/<ベースブランチ> HEAD
+```
+
+- **終了コード0（ベースが祖先＝追いついている）** → rebase不要。通常の `git push` でプッシュする。
+- **終了コード1（ベースが先に進んでいる）** → rebaseが必要。rebase後に `git push --force-with-lease` でプッシュする。rebaseでコンフリクトが発生した場合は状況を表示してユーザーに判断を委ねる。
+
+```bash
+# rebaseが必要な場合のみ
+git rebase origin/<ベースブランチ>
+git push --force-with-lease
+
+# rebase不要の場合
+git push
+```
 
 次に、ベースブランチとの差分を分析してPRのタイトルと本文を再生成する：
 ```bash
