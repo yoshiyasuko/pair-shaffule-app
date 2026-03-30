@@ -47,6 +47,21 @@ function exportPairsToSpreadsheet(pairsData) {
       throw new Error('スクリプトプロパティに「EXPORT_TEMPLATE_SPREADSHEET_ID」が設定されていません');
     }
 
+    var ss = SpreadsheetApp.openById(templateId);
+
+    // Find template sheet (name starts with 【テンプレ】)
+    var templateSheet = null;
+    var sheets = ss.getSheets();
+    for (var s = 0; s < sheets.length; s++) {
+      if (sheets[s].getName().indexOf('【テンプレ】') === 0) {
+        templateSheet = sheets[s];
+        break;
+      }
+    }
+    if (!templateSheet) {
+      throw new Error('「【テンプレ】」で始まるシートが見つかりません');
+    }
+
     // Determine fiscal year and period (8月決算: 9-2月=上期, 3-8月=下期)
     var now = new Date();
     var month = now.getMonth() + 1; // 1-based
@@ -64,41 +79,24 @@ function exportPairsToSpreadsheet(pairsData) {
     }
     var yy = String(fiscalYear).slice(-2);
 
-    // Build title from template name
-    var templateFile = DriveApp.getFileById(templateId);
-    var baseTitle = templateFile.getName()
-      .replace('【テンプレ】', '')
-      .replace('{YY}', yy)
-      .replace('{上/下}', period)
-      .trim();
+    // Build sheet name: "xx年度x期" format
+    var baseSheetName = yy + '年度' + period + '期';
 
-    // Check for duplicates in the GAS project's folder
-    var scriptFile = DriveApp.getFileById(ScriptApp.getScriptId());
-    var folders = scriptFile.getParents();
-    var folder = folders.hasNext() ? folders.next() : null;
-    var finalTitle = baseTitle;
-    if (folder) {
-      var suffix = 2;
-      while (folder.getFilesByName(finalTitle).hasNext()) {
-        finalTitle = baseTitle + '-' + suffix;
-        suffix++;
-      }
+    // Check for duplicate sheet names
+    var finalSheetName = baseSheetName;
+    var suffix = 2;
+    while (ss.getSheetByName(finalSheetName)) {
+      finalSheetName = baseSheetName + '-' + suffix;
+      suffix++;
     }
 
-    // Copy template into the GAS project's folder
-    var copiedFile = folder
-      ? templateFile.makeCopy(finalTitle, folder)
-      : templateFile.makeCopy(finalTitle);
+    // Copy template sheet within the same spreadsheet
+    var sheet = templateSheet.copyTo(ss);
+    sheet.setName(finalSheetName);
 
-    // Share with organization as editor
-    copiedFile.setSharing(DriveApp.Access.DOMAIN, DriveApp.Permission.EDIT);
-
-    // Open copied spreadsheet and find 管理 sheet
-    var ss = SpreadsheetApp.openById(copiedFile.getId());
-    var sheet = ss.getSheetByName('管理');
-    if (!sheet) {
-      throw new Error('コピー先スプレッドシートに「管理」シートが見つかりません');
-    }
+    // Move to the leftmost position
+    ss.setActiveSheet(sheet);
+    ss.moveActiveSheet(1);
 
     // Find メンバー header column in row 1
     var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
@@ -110,7 +108,7 @@ function exportPairsToSpreadsheet(pairsData) {
       }
     }
     if (memberCol === -1) {
-      throw new Error('「管理」シートに「メンバー」ヘッダーが見つかりません');
+      throw new Error('テンプレートシートに「メンバー」ヘッダーが見つかりません');
     }
 
     // Build flat list of names from pairs
@@ -130,7 +128,7 @@ function exportPairsToSpreadsheet(pairsData) {
       sheet.getRange(2, memberCol, names.length, 1).setValues(names);
     }
 
-    return ss.getUrl();
+    return ss.getUrl() + '#gid=' + sheet.getSheetId();
   } catch (e) {
     throw new Error('スプレッドシートへの出力に失敗しました: ' + e.message);
   }
