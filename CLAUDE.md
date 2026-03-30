@@ -24,7 +24,7 @@ GitHub Actionsにより、mainブランチへのPRマージ時に自動でproduc
 
 ## アーキテクチャ
 
-- **src/server/Code.js** — サーバーサイドGAS関数。`doGet()`でWebアプリを配信。`getEmployeeList()`でスプレッドシートからメンバーリストを取得（A列=チェックボックス有効、B列=名前）。`getSpreadsheetUrl()`でメンバーリストのスプレッドシートURLを返却。`exportPairsToSpreadsheet()`でペア結果をテンプレートスプレッドシートのコピーに出力。スクリプトプロパティ: `SPREADSHEET_ID`（メンバーリスト）、`EXPORT_TEMPLATE_SPREADSHEET_ID`（エクスポート用テンプレート）。
+- **src/server/Code.js** — サーバーサイドGAS関数。`doGet()`でWebアプリを配信。`getEmployeeList()`でスプレッドシートからメンバーリストを取得（A列=チェックボックス有効、B列=名前）。`getSpreadsheetUrl()`でメンバーリストのスプレッドシートURLを返却。`exportPairsToSpreadsheet()`でテンプレートスプレッドシート内の「【テンプレ】」プレフィックス付きシートをコピーし、同一スプレッドシート内にペア結果を出力（シート名は「xx年度x期」形式、一番左に配置）。スクリプトプロパティ: `SPREADSHEET_ID`（メンバーリスト）、`EXPORT_TEMPLATE_SPREADSHEET_ID`（エクスポート用テンプレート）。
 - **src/client/Index.html** — メインHTMLテンプレート。GASの`include()`ヘルパーでCSS/JSをインライン展開。
 - **src/client/Stylesheet.html** — 全CSS（`<?!= include('client/Stylesheet'); ?>`でインライン化）。
 - **src/client/JavaScript.html** — 全クライアントサイドJS（`<?!= include('client/JavaScript'); ?>`でインライン化）。単一のIIFEで、状態管理・Fisher-Yatesシャッフル・ペア生成・カード描画・Web Audio API効果音・Canvas紙吹雪アニメーションを含む。
@@ -53,7 +53,7 @@ GitHub Actionsにより、mainブランチへのPRマージ時に自動でproduc
 
 | コマンド | 概要 |
 |---------|------|
-| `/git-workflow:commit` | Conventional Commits形式でコミットを作成。`$ARGUMENTS` で `skip-hooks`/`skip-push` モード制御が可能。 |
+| `/git-workflow:commit` | Conventional Commits形式でコミットを作成。`$ARGUMENTS` で `skip-pre-hooks`/`skip-post-hooks`/`skip-push` モード制御が可能。 |
 | `/git-workflow:create-pr` | PRを作成・更新する。未コミット変更の処理からPR作成までを自動化。既存PRがあれば本文を更新する。 |
 | `/git-workflow:sync-main` | mainブランチに切り替えて最新化し、リモートで削除済みのローカルブランチをクリーンアップする。 |
 
@@ -79,10 +79,10 @@ GitHub Actionsにより、mainブランチへのPRマージ時に自動でproduc
 
 ```
 /git-workflow:commit → [pre-commit hook] → (プッシュ確認) → [post-push hook]
-/deploy → (未コミット検出時) → /git-workflow:commit (skip-push skip-hooks) → デプロイ続行
-/preview-deploy → (未コミット検出時) → /git-workflow:commit (skip-push skip-hooks) → プレビューデプロイ続行
+/deploy → (未コミット検出時) → /git-workflow:commit (skip-push skip-pre-hooks skip-post-hooks) → デプロイ続行
+/preview-deploy → (未コミット検出時) → /git-workflow:commit (skip-push skip-pre-hooks skip-post-hooks) → プレビューデプロイ続行
 /kill-all-preview → プレビューデプロイの一括削除
-/git-workflow:create-pr → (未コミット検出時) → /git-workflow:commit (skip-push skip-hooks) → push → PR作成 → [post-pr hook]
+/git-workflow:create-pr → (未コミット検出時) → /git-workflow:commit (skip-push skip-post-hooks) → push → PR作成 → [post-pr hook]
 ```
 
 どちらのデプロイスキルからでも開始でき、必要に応じて `/commit` を呼び出す。
