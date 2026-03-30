@@ -328,6 +328,9 @@
     completeMessage.textContent = '🎉 全ペア発表完了！ 🎉';
     completeMessage.classList.add('visible');
     exportBtn.style.display = 'inline-block';
+    setTimeout(() => {
+      exportBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 500);
     if (soundEnabled) playFanfareSound();
     spawnConfetti(window.innerWidth / 2, window.innerHeight / 2, 200, false);
   }
