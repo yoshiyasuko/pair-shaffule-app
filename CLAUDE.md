@@ -20,7 +20,7 @@ clasp open --webapp # デプロイ済みWebアプリを開く
 
 ### CI/CD 自動デプロイ
 
-GitHub Actionsにより、mainブランチへのPRマージ時に自動でproductionデプロイが実行される。手動実行（workflow_dispatch）も可能。認証にはOAuthリフレッシュトークンを使用（GitHub Secretsに `CLASPRC_JSON`・`CLASP_JSON`・`GAS_DEPLOYMENT_ID` を設定）。
+GitHub Actionsにより、mainブランチへのPRマージ時（`src/`配下に変更がある場合のみ）に自動でproductionデプロイが実行される。手動実行（workflow_dispatch）も可能。認証にはOAuthリフレッシュトークンを使用（GitHub Secretsに `CLASPRC_JSON`・`CLASP_JSON`・`GAS_DEPLOYMENT_ID` を設定）。
 
 ## アーキテクチャ
 
@@ -30,7 +30,7 @@ GitHub Actionsにより、mainブランチへのPRマージ時に自動でproduc
 - **src/client/JavaScript.html** — 全クライアントサイドJS（`<?!= include('client/JavaScript'); ?>`でインライン化）。単一のIIFEで、状態管理・Fisher-Yatesシャッフル・ペア生成・カード描画・Web Audio API効果音・Canvas紙吹雪アニメーションを含む。
 - **src/appsscript.json** — GASマニフェスト（タイムゾーン: Asia/Tokyo、ランタイム: V8、Webアプリアクセス: MYSELF、OAuthスコープ: spreadsheets・drive）。
 - **.clasp.json** — clasp設定（スクリプトID、`rootDir: "src"`）。
-- **.github/workflows/deploy.yml** — GitHub Actionsワークフロー。mainへのPRマージ時にclasp push→deployを自動実行。
+- **.github/workflows/deploy.yml** — GitHub Actionsワークフロー。mainへのPRマージ時（`src/`配下の変更時のみ）にclasp push→deployを自動実行。
 
 ## 設計上のポイント
 
