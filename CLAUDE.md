@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Google Apps Script (GAS) のWebアプリ。Google スプレッドシートの「Members」シートからメンバーリストを読み込み、ランダムにペアを生成してカードめくりアニメーションで発表する。
 
+## ブランチ戦略
+
+GitHub Flow を採用。`main` ブランチが常にデプロイ可能な状態を維持し、機能追加・修正はフィーチャーブランチからPRを通じて `main` にマージする。
+
 ## デプロイ
 
 **clasp** (Command Line Apps Script) を使用してローカル開発・デプロイを行う。ビルド、リンター、テストフレームワークは未導入。
