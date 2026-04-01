@@ -44,7 +44,7 @@ GitHub Actionsにより、mainブランチへのPRマージ時（`src/`配下に
 
 ## スキル（スラッシュコマンド）
 
-プロジェクト固有スキルは `.claude/commands/` に、汎用スキルは `git-workflow` プラグイン（`claude-code-git-workflow-plugins` リポジトリ）から提供される。`/<スキル名>` で呼び出す。
+プロジェクト固有スキルは `.claude/skills/` に、汎用スキルは `git-workflow` プラグイン（`claude-code-git-workflow-plugins` リポジトリ）から提供される。`/<スキル名>` で呼び出す。
 
 **汎用スキル**（`git-workflow` プラグイン提供）:
 
@@ -61,7 +61,7 @@ GitHub Actionsにより、mainブランチへのPRマージ時（`src/`配下に
 | `/git-workflow:create-pr` | PRを作成・更新する。未コミット変更の処理からPR作成までを自動化。既存PRがあれば本文を更新する。 |
 | `/git-workflow:sync-main` | mainブランチに切り替えて最新化し、リモートで削除済みのローカルブランチをクリーンアップする。 |
 
-**プロジェクト固有スキル**（`.claude/commands/`）:
+**プロジェクト固有スキル**（`.claude/skills/`）:
 
 | コマンド | 概要 |
 |---------|------|
