@@ -35,6 +35,7 @@ GitHub Actionsにより、mainブランチへのPRマージ時（`src/`配下に
 - **src/appsscript.json** — GASマニフェスト（タイムゾーン: Asia/Tokyo、ランタイム: V8、Webアプリアクセス: MYSELF、OAuthスコープ: spreadsheets・drive）。
 - **.clasp.json** — clasp設定（スクリプトID、`rootDir: "src"`）。
 - **.github/workflows/deploy.yml** — GitHub Actionsワークフロー。mainへのPRマージ時（`src/`配下の変更時のみ）にclasp push→deployを自動実行。
+- **.agents/skills/** — 外部スキル（`find-skills`・`skill-creator`）の実体。`.claude/skills/` からシンボリックリンクで参照される。
 
 ## 設計上のポイント
 
@@ -69,6 +70,8 @@ GitHub Actionsにより、mainブランチへのPRマージ時（`src/`配下に
 | `/preview-deploy` | GASへのプレビューデプロイを作成。productionデプロイとは別に `[PREVIEW]` プレフィックス付きデプロイを作成・管理する。 |
 | `/kill-all-preview` | プレビューデプロイを全て削除。`[PREVIEW]` プレフィックス付きデプロイのみを対象とし、productionデプロイには触れない。 |
 | `/update-docs` | コード変更後にREADME.md/CLAUDE.mdの更新が必要かを判断し、必要なら更新する。変更がない場合はドキュメントと実態の整合性を検証する。 |
+| `/find-skills` | スキルの検索・インストールを支援。`npx skills` CLIを使って外部スキルエコシステムからスキルを発見する。 |
+| `/skill-creator` | 新規スキルの作成、既存スキルの改善、eval によるパフォーマンス測定を行う。 |
 
 ### スキルフック（`.claude/skill-hooks.md`）
 
