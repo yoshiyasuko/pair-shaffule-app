@@ -4,6 +4,13 @@
 
 Google スプレッドシートのメンバーリストからランダムにペアを生成し、カードめくりアニメーションで発表する Google Apps Script Webアプリ。
 
+<table>
+   <tr>
+      <td><img height="300" alt="image" src="https://github.com/user-attachments/assets/668e8b03-91c3-4bf4-a034-5f46fda7394f" /></td>
+      <td><img height="300" alt="image" src="https://github.com/user-attachments/assets/5c8c92b8-abcc-4667-82e6-85f49a949793" /></td>
+   </tr>
+</table>
+
 ## 機能
 
 - スプレッドシートからチェックボックスで有効なメンバーを読み込み
