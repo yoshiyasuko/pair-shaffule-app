@@ -62,25 +62,19 @@ function exportPairsToSpreadsheet(pairsData) {
       throw new Error('「【テンプレ】」で始まるシートが見つかりません');
     }
 
-    // Determine fiscal year and period (8月決算: 9-2月=上期, 3-8月=下期)
+    // Build sheet name covering current and next month
+    // Same year: "26年6-7月" / Year crossing: "26年12月-27年1月"
     var now = new Date();
     var month = now.getMonth() + 1; // 1-based
     var year = now.getFullYear();
-    var fiscalYear, period;
-    if (month >= 9) {
-      fiscalYear = year;
-      period = '上';
-    } else if (month <= 2) {
-      fiscalYear = year - 1;
-      period = '上';
+    var yy = String(year).slice(-2);
+    var baseSheetName;
+    if (month === 12) {
+      var nextYy = String(year + 1).slice(-2);
+      baseSheetName = yy + '年12月-' + nextYy + '年1月';
     } else {
-      fiscalYear = year - 1;
-      period = '下';
+      baseSheetName = yy + '年' + month + '-' + (month + 1) + '月';
     }
-    var yy = String(fiscalYear).slice(-2);
-
-    // Build sheet name: "xx年度x期" format
-    var baseSheetName = yy + '年度' + period + '期';
 
     // Check for duplicate sheet names
     var finalSheetName = baseSheetName;
