@@ -28,7 +28,7 @@ GitHub Actionsにより、mainブランチへのPRマージ時（`src/`配下に
 
 ## アーキテクチャ
 
-- **src/server/Code.js** — サーバーサイドGAS関数。`doGet()`でWebアプリを配信。`getEmployeeList()`でスプレッドシートからメンバーリストを取得（A列=チェックボックス有効、B列=名前）。`getSpreadsheetUrl()`でメンバーリストのスプレッドシートURLを返却。`exportPairsToSpreadsheet()`でテンプレートスプレッドシート内の「【テンプレ】」プレフィックス付きシートをコピーし、同一スプレッドシート内にペア結果を出力（シート名は「xx年度x期」形式、一番左に配置）。スクリプトプロパティ: `SPREADSHEET_ID`（メンバーリスト）、`EXPORT_TEMPLATE_SPREADSHEET_ID`（エクスポート用テンプレート）。
+- **src/server/Code.js** — サーバーサイドGAS関数。`doGet()`でWebアプリを配信。`getEmployeeList()`でスプレッドシートからメンバーリストを取得（A列=チェックボックス有効、B列=名前）。`getSpreadsheetUrl()`でメンバーリストのスプレッドシートURLを返却。`exportPairsToSpreadsheet()`でテンプレートスプレッドシート内の「【テンプレ】」プレフィックス付きシートをコピーし、同一スプレッドシート内にペア結果を出力（シート名は当月を含む2ヶ月間の「xx年x-x月」形式（年跨ぎは「xx年12月-xx年1月」）、一番左に配置）。スクリプトプロパティ: `SPREADSHEET_ID`（メンバーリスト）、`EXPORT_TEMPLATE_SPREADSHEET_ID`（エクスポート用テンプレート）。
 - **src/client/Index.html** — メインHTMLテンプレート。GASの`include()`ヘルパーでCSS/JSをインライン展開。
 - **src/client/Stylesheet.html** — 全CSS（`<?!= include('client/Stylesheet'); ?>`でインライン化）。
 - **src/client/JavaScript.html** — 全クライアントサイドJS（`<?!= include('client/JavaScript'); ?>`でインライン化）。単一のIIFEで、状態管理・Fisher-Yatesシャッフル・ペア生成・カード描画・Web Audio API効果音・Canvas紙吹雪アニメーションを含む。
