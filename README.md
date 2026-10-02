@@ -27,17 +27,22 @@ Google スプレッドシートのメンバーリストからランダムにペ�
 
 ### 前提条件
 
-- [Node.js](https://nodejs.org/)
+- [mise](https://mise.jdx.dev/)（`brew install mise`）— Node.js のバージョン管理に使用。リポジトリ直下の `.node-version` で Node のバージョンを固定している
+  - シェル初期化に `eval "$(mise activate zsh)"` を追加（bash の場合は `zsh` を `bash` に置換）
+  - `.node-version` を読ませるため `mise settings add idiomatic_version_file_enable_tools node` を一度実行
 - [clasp](https://github.com/google/clasp)（`npm install -g @google/clasp`）
 - `clasp login` でGoogleアカウント認証済み
 
 ### 手順
 
-1. リポジトリをクローン
+1. リポジトリをクローンし、Node.js と clasp を導入
 
    ```bash
    git clone <repository-url>
    cd pair-shuffle-app
+   mise install                      # .node-version の Node をインストール
+   npm install -g @google/clasp      # mise 管理の Node 配下に clasp を導入
+   clasp login
    ```
 
 2. GASプロジェクトを作成し、`.clasp.json` を配置

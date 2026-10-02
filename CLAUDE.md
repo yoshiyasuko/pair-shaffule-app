@@ -12,7 +12,7 @@ GitHub Flow を採用。`main` ブランチが常にデプロイ可能な状態�
 
 ## デプロイ
 
-**clasp** (Command Line Apps Script) を使用してローカル開発・デプロイを行う。ビルド、リンター、テストフレームワークは未導入。
+**clasp** (Command Line Apps Script) を使用してローカル開発・デプロイを行う。Node.js のバージョンは **mise** で管理し、リポジトリ直下の `.node-version` で固定する（CI の `actions/setup-node` も同じファイルを参照）。ビルド、リンター、テストフレームワークは未導入。
 
 ```bash
 clasp push          # ローカルファイルをGASにプッシュ
@@ -33,7 +33,8 @@ GitHub Actionsにより、mainブランチへのPRマージ時（`src/`配下に
 - **src/client/Stylesheet.html** — 全CSS（`<?!= include('client/Stylesheet'); ?>`でインライン化）。
 - **src/client/JavaScript.html** — 全クライアントサイドJS（`<?!= include('client/JavaScript'); ?>`でインライン化）。単一のIIFEで、状態管理・Fisher-Yatesシャッフル・ペア生成・カード描画・Web Audio API効果音・Canvas紙吹雪アニメーションを含む。
 - **src/appsscript.json** — GASマニフェスト（タイムゾーン: Asia/Tokyo、ランタイム: V8、Webアプリアクセス: MYSELF、OAuthスコープ: spreadsheets・drive）。
-- **.clasp.json** — clasp設定（スクリプトID、`rootDir: "src"`）。
+- **.clasp.json** — clasp設定（スクリプトID、`rootDir: "src"`）。gitignore 対象。
+- **.node-version** — mise が読む Node.js のバージョン固定ファイル。CI もこのファイルを参照する。
 - **.github/workflows/deploy.yml** — GitHub Actionsワークフロー。mainへのPRマージ時（`src/`配下の変更時のみ）にclasp push→deployを自動実行。
 - **.agents/skills/** — 外部スキル（`find-skills`・`skill-creator`）の実体。`.claude/skills/` からシンボリックリンクで参照される。
 
